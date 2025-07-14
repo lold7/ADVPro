@@ -3,6 +3,7 @@ package se233.chapter1.view;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
@@ -12,6 +13,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import se233.chapter1.Launcher;
+import se233.chapter1.controller.AllCustomHandler;
 import se233.chapter1.model.item.Armor;
 import se233.chapter1.model.item.Weapon;
 
@@ -70,14 +72,18 @@ public class EquipPane extends ScrollPane {
             @Override
             public void handle(DragEvent e) { onDragDropped(e, armorLbl, armorImgGroup); }
         });
-        equipmentInfoPane.getChildren().addAll(weaponLbl,weaponImgGroup,armorLbl, armorImgGroup);
+
+        Button unequipButton = new Button("Unequip All");
+        unequipButton.setOnAction(new AllCustomHandler.UnequipAllHandler());
+
+        equipmentInfoPane.getChildren().addAll(weaponLbl,weaponImgGroup,armorLbl, armorImgGroup, unequipButton);
         return equipmentInfoPane;
     }
     public void drawPane(Weapon equippedWeapon, Armor equippedArmor) {
         this.equippedWeapon = equippedWeapon;
         this.equippedArmor = equippedArmor;
         Pane equipmentInfo = getDetailsPane();
-        this.setStyle("-fx-background-color:Red;");
+        this.setStyle("-fx-background-color:#37ff00;");
         this.setContent(equipmentInfo);
     }
 }

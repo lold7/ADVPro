@@ -1,5 +1,6 @@
 package se233.chapter1.view;
 
+
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.control.ScrollPane;
@@ -18,7 +19,6 @@ import static se233.chapter1.controller.AllCustomHandler.onDragDetected;
 import static se233.chapter1.controller.AllCustomHandler.onEquipDone;
 
 public class InventoryPane extends ScrollPane {
-
     private ArrayList<BasedEquipment> equipmentArray;
     public InventoryPane() { }
     private Pane getDetailsPane(){

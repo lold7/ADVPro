@@ -18,6 +18,7 @@ public class BasedCharacter {
     public Integer getPower() { return power; }
     public Integer getDefense() { return defense; }
     public Integer getResistance() { return resistance; }
+
     public void equipWeapon( Weapon weapon) {
         this.weapon = weapon;
         this.power = this.basedPow + weapon.getPower();
@@ -27,6 +28,22 @@ public class BasedCharacter {
         this.defense = this.basedDef + armor.getDefense();
         this.resistance= this.basedRes + armor.getResistance();
     }
+
+    public void unequipWeapon() {
+        if (this.weapon != null) {
+            this.power = this.basedPow;
+            this.weapon = null;
+        }
+    }
+
+    public void unequipArmor() {
+        if (this.armor != null) {
+            this.defense = this.basedDef;
+            this.resistance = this.basedRes;
+            this.armor = null;
+        }
+    }
+
     @Override
     public String toString() { return name; }
     public DamageType getType() {

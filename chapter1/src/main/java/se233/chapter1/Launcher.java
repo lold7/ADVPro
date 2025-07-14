@@ -22,13 +22,13 @@ public class Launcher extends Application {
     public static Scene getMainScene() {
         return mainScene;
     }
-
     public static void setMainScene(Scene mainScene) {
         Launcher.mainScene = mainScene;
     }
-
     private static Scene mainScene;
+    //--------------------------------------------------------------------------------------------
     private static BasedCharacter mainCharacter = null;
+    //--------------------------------------------------------------------------------------------
 
     private static ArrayList<BasedEquipment> allEquipments = null;
 
@@ -80,10 +80,12 @@ public class Launcher extends Application {
     }
 
     private static InventoryPane inventoryPane = null;
+
+
     @Override
     public void start(Stage primaryStage) throws Exception{
         primaryStage.setTitle("Chapter1");
-        primaryStage.setResizable(false);
+        primaryStage.setResizable(true);
         primaryStage.show();
         mainCharacter = GenCharacter.setUpCharacter();
         allEquipments = GenItemList.setUpItemList();
