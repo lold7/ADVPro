@@ -1,13 +1,16 @@
 package se233.chapter3.controller;
 
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -18,59 +21,42 @@ import se233.chapter3.model.PdfDocument;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
-//Imports are omitted
 public class MainViewController {
-    LinkedHashMap<String, List<FileFreq>> uniqueSets;
+    private LinkedHashMap<String, List<FileFreq>> uniqueSets;
     @FXML
-    private ListView<String>inputListView;
+    private ListView<String> inputListView;
     @FXML
     private Button startButton;
-
-    public ListView getListView() {
-        return listView;
-    }
-
-    public void setListView(ListView listView) {
-        this.listView = listView;
-    }
-
-    public Button getStartButton() {
-        return startButton;
-    }
-
-    public void setStartButton(Button startButton) {
-        this.startButton = startButton;
-    }
-
-    public ListView<String> getInputListView() {
-        return inputListView;
-    }
-
-    public void setInputListView(ListView<String> inputListView) {
-        this.inputListView = inputListView;
-    }
-
-    public LinkedHashMap<String, List<FileFreq>> getUniqueSets() {
-        return uniqueSets;
-    }
-
-    public void setUniqueSets(LinkedHashMap<String, List<FileFreq>> uniqueSets) {
-        this.uniqueSets = uniqueSets;
-    }
+    @FXML
+    private ListView<String> listView;
 
     @FXML
-    private ListView listView;
+    private void onClose() {
+        Platform.exit();
+    }
+
     @FXML
     public void initialize() {
-        inputListView.setOnDragOver(event->  {
+        inputListView.setCellFactory(param -> new ListCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(new File(item).getName());
+                }
+            }
+        });
+
+        inputListView.setOnDragOver(event -> {
             Dragboard db = event.getDragboard();
             final boolean isAccepted = db.getFiles().get(0).getName().toLowerCase().endsWith(".pdf");
             if (db.hasFiles() && isAccepted) {
@@ -80,96 +66,122 @@ public class MainViewController {
             }
         });
 
-        inputListView.setOnDragDropped(event-> {
+        inputListView.setOnDragDropped(event -> {
             Dragboard db = event.getDragboard();
             boolean success = false;
             if (db.hasFiles()) {
                 success = true;
-                String filePath;
-                int total_files = db.getFiles().size();
-                WordCountMapTask[] wordCountMapTaskArray = new WordCountMapTask[total_files];
-                Map<String, FileFreq>[] wordMap = new Map[total_files];
-                for (int i = 0; i < total_files; i++) {
-
-                    File file = db.getFiles().get(i);
-                    filePath = file.getAbsolutePath();
-                    inputListView.getItems().add(filePath);
-
+                for (File file : db.getFiles()) {
+                    inputListView.getItems().add(file.getAbsolutePath());
                 }
             }
             event.setDropCompleted(success);
             event.consume();
         });
-        startButton.setOnAction(event-> {
+
+        startButton.setOnAction(event -> {
             Parent bgRoot = Launcher.primaryStage.getScene().getRoot();
-            Task<Void> processTask = new Task<Void>() {
+            Task<Void> processTask = new Task<>() {
                 @Override
-                public Void call() throws IOException {
+                public Void call() {
                     ProgressIndicator pi = new ProgressIndicator();
                     VBox box = new VBox(pi);
                     box.setAlignment(Pos.CENTER);
                     Launcher.primaryStage.getScene().setRoot(box);
-            ExecutorService executor = Executors.newFixedThreadPool(4);
-            final ExecutorCompletionService<Map<String,FileFreq>> completionService = new ExecutorCompletionService<>(executor);
-            List<String> inputListViewItems = inputListView.getItems();
-            int total_files = inputListViewItems.size();
 
-            Map<String, FileFreq>[] wordMap = new Map[total_files];
-            for (int i = 0; i < total_files; i++) {
-                try {
-                    String filePath = inputListViewItems.get(i);
-                    PdfDocument p = new PdfDocument(filePath);
-                    completionService.submit(new WordCountMapTask(p));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            for(int i=0; i < total_files; i++){
-                try{
-                    Future<Map<String,FileFreq>> future= completionService.take();
-                    wordMap[i]=future.get();
-                }catch(Exception e){
-                    e.printStackTrace();
-                }
-            }
-            try{
-                WordCountReduceTask merger = new WordCountReduceTask(wordMap);
-                Future<LinkedHashMap<String, List<FileFreq>>>future =executor.submit(merger);
-                uniqueSets =future.get();
-                listView.getItems().addAll(uniqueSets.keySet());
-            }catch (Exception e){
-                e.printStackTrace();
-            }finally {
-                executor.shutdown();
-            }
+                    ExecutorService executor = Executors.newFixedThreadPool(4);
+                    final ExecutorCompletionService<Map<String, FileFreq>> completionService = new ExecutorCompletionService<>(executor);
+                    List<String> inputListViewItems = inputListView.getItems();
+                    int total_files = inputListViewItems.size();
+
+                    Map<String, FileFreq>[] wordMap = new Map[total_files];
+                    for (int i = 0; i < total_files; i++) {
+                        try {
+                            String filePath = inputListViewItems.get(i);
+                            PdfDocument p = new PdfDocument(filePath);
+                            completionService.submit(new WordCountMapTask(p));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    for (int i = 0; i < total_files; i++) {
+                        try {
+                            Future<Map<String, FileFreq>> future = completionService.take();
+                            wordMap[i] = future.get();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    try {
+                        WordCountReduceTask merger = new WordCountReduceTask(wordMap);
+                        Future<LinkedHashMap<String, List<FileFreq>>> future = executor.submit(merger);
+                        uniqueSets = future.get();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        executor.shutdown();
+                    }
                     return null;
                 }
             };
-            processTask.setOnSucceeded( e-> {
+            processTask.setOnSucceeded(e -> {
                 Launcher.primaryStage.getScene().setRoot(bgRoot);
+                listView.getItems().clear();
+                for (Map.Entry<String, List<FileFreq>> entry : uniqueSets.entrySet()) {
+                    String word = entry.getKey();
+                    String frequencies = entry.getValue().stream()
+                            .map(FileFreq::getFreq)
+                            .sorted(Comparator.reverseOrder())
+                            .map(String::valueOf)
+                            .collect(Collectors.joining(", "));
+                    listView.getItems().add(String.format("%s (%s)", word, frequencies));
+                }
             });
             Thread thread = new Thread(processTask);
             thread.setDaemon(true);
             thread.start();
-
         });
-        listView.setOnMouseClicked(event-> {
-            List<FileFreq> listOfLinks = uniqueSets.get(listView.getSelectionModel().getSelectedItem());
+
+        listView.setOnMouseClicked(event -> {
+            String selectedItem = listView.getSelectionModel().getSelectedItem();
+            if (selectedItem == null) return;
+
+            String key = selectedItem.split(" \\(")[0];
+            List<FileFreq> listOfLinks = uniqueSets.get(key);
+            if(listOfLinks == null) return;
+
             ListView<FileFreq> popupListView = new ListView<>();
-            LinkedHashMap<FileFreq,String> lookupTable = new LinkedHashMap<>();
-            for (int i=0 ; i<listOfLinks.size() ; i++) {
-                lookupTable.put(listOfLinks.get(i),listOfLinks.get(i).getPath());
-                popupListView.getItems().add(listOfLinks.get(i));
+            LinkedHashMap<FileFreq, String> lookupTable = new LinkedHashMap<>();
+            for (FileFreq fileFreq : listOfLinks) {
+                lookupTable.put(fileFreq, fileFreq.getPath());
+                popupListView.getItems().add(fileFreq);
             }
+
             popupListView.setPrefWidth(Region.USE_COMPUTED_SIZE);
-            popupListView.setPrefHeight(popupListView.getItems().size() * 40);
-            popupListView.setOnMouseClicked(innerEvent-> {
-                Launcher.hs.showDocument("file:///"+lookupTable.get(popupListView.getSelectionModel().getSelectedItem()));
-                popupListView.getScene().getWindow().hide();
+            popupListView.setPrefHeight(Math.min(popupListView.getItems().size() * 40, 400));
+
+            Popup popup = new Popup(); // Define popup before it's used in handlers
+
+            popupListView.setOnMouseClicked(innerEvent -> {
+                String selectedPath = lookupTable.get(popupListView.getSelectionModel().getSelectedItem());
+                Launcher.hs.showDocument("file:///" + selectedPath);
+                popup.hide(); // Use popup.hide() for consistency
             });
-            Popup popup = new Popup();
+
+            // The new event handler for the Escape key is added here
+            popupListView.setOnKeyPressed(keyEvent -> {
+                if (keyEvent.getCode() == KeyCode.ESCAPE) {
+                    popup.hide();
+                }
+            });
+
             popup.getContent().add(popupListView);
             popup.show(Launcher.primaryStage);
         });
     }
+
+    // Unmodified getters and setters are omitted for brevity
+    public ListView<String> getListView() { return listView; }
+    public void setListView(ListView<String> listView) { this.listView = listView; }
+    // ...
 }
