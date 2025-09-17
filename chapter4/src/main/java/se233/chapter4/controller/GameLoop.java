@@ -6,39 +6,6 @@ import se233.chapter4.view.GameStage;
 public class GameLoop implements Runnable {
     private GameStage gameStage;
     private int frameRate;
-
-    public GameStage getGameStage() {
-        return gameStage;
-    }
-
-    public void setGameStage(GameStage gameStage) {
-        this.gameStage = gameStage;
-    }
-
-    public int getFrameRate() {
-        return frameRate;
-    }
-
-    public void setFrameRate(int frameRate) {
-        this.frameRate = frameRate;
-    }
-
-    public float getInterval() {
-        return interval;
-    }
-
-    public void setInterval(float interval) {
-        this.interval = interval;
-    }
-
-    public boolean isRunning() {
-        return running;
-    }
-
-    public void setRunning(boolean running) {
-        this.running = running;
-    }
-
     private float interval;
     private boolean running;
 
@@ -48,10 +15,11 @@ public class GameLoop implements Runnable {
         interval = 1000.0f / frameRate;
         running = true;
     }
+
     private void update(GameCharacter gameCharacter) {
         boolean leftPressed = gameStage.getKeys().isPressed(gameCharacter.getLeftKey());
         boolean rightPressed = gameStage.getKeys().isPressed(gameCharacter.getRightKey());
-        boolean upPressed =gameStage.getKeys().isPressed(gameCharacter.getUpKey());
+        boolean upPressed = gameStage.getKeys().isPressed(gameCharacter.getUpKey());
 
         if(upPressed){
             gameCharacter.jump();
@@ -61,22 +29,25 @@ public class GameLoop implements Runnable {
         } else if (leftPressed) {
             gameCharacter.getImageView().tick();
             gameCharacter.moveLeft();
-            gameStage.getGameCharacter().trace();
+            gameCharacter.trace(); // Corrected to trace the current character
         } else if (rightPressed) {
             gameCharacter.getImageView().tick();
             gameCharacter.moveRight();
-            gameStage.getGameCharacter().trace();
+            gameCharacter.trace(); // Corrected to trace the current character
         } else {
             gameCharacter.stop();
         }
     }
+
     @Override
     public void run() {
         while (running) {
             float time = System.currentTimeMillis();
 
-            update(gameStage.getGameCharacter());
-
+            // Loop through all characters and update them
+            for (GameCharacter character : gameStage.getCharacters()) {
+                update(character);
+            }
 
             time = System.currentTimeMillis() - time;
 

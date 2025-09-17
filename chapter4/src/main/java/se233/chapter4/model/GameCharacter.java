@@ -1,4 +1,5 @@
 package se233.chapter4.model;
+
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
@@ -17,205 +18,89 @@ public class GameCharacter extends Pane {
     private KeyCode leftKey;
     private KeyCode rightKey;
     private KeyCode upKey;
-    int xVelocity=0;
+    int xVelocity = 0;
     boolean isMoveLeft = false;
     boolean isMoveRight = false;
     int yVelocity = 3;
     boolean isFalling = true;
-    boolean canJump= false;
-    boolean isJumping =false;
-    int xAcceleration =1;
-    int yAcceleration =1;
+    boolean canJump = false;
+    boolean isJumping = false;
+    int xAcceleration = 1;
+    int yAcceleration = 1;
+    int xMaxVelocity = 7;
+    int yMaxVelocity = 17;
 
-    public Image getGameCharacterImg() {
-        return gameCharacterImg;
-    }
+    // New state flag to track wall collision
+    private boolean isTouchingWall = false;
 
-    public void setGameCharacterImg(Image gameCharacterImg) {
-        this.gameCharacterImg = gameCharacterImg;
-    }
-
-    public AnimatedSprite getImageView() {
-        return imageView;
-    }
-
-    public void setImageView(AnimatedSprite imageView) {
-        this.imageView = imageView;
-    }
-
-    public int getX() {
-        return x;
-    }
-
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public void setY(int y) {
-        this.y = y;
-    }
-
-    public KeyCode getLeftKey() {
-        return leftKey;
-    }
-
-    public void setLeftKey(KeyCode leftKey) {
-        this.leftKey = leftKey;
-    }
-
-    public KeyCode getRightKey() {
-        return rightKey;
-    }
-
-    public void setRightKey(KeyCode rightKey) {
-        this.rightKey = rightKey;
-    }
-
-    public KeyCode getUpKey() {
-        return upKey;
-    }
-
-    public void setUpKey(KeyCode upKey) {
-        this.upKey = upKey;
-    }
-
-    public int getxVelocity() {
-        return xVelocity;
-    }
-
-    public void setxVelocity(int xVelocity) {
-        this.xVelocity = xVelocity;
-    }
-
-    public boolean isMoveLeft() {
-        return isMoveLeft;
-    }
-
-    public void setMoveLeft(boolean moveLeft) {
-        isMoveLeft = moveLeft;
-    }
-
-    public boolean isMoveRight() {
-        return isMoveRight;
-    }
-
-    public void setMoveRight(boolean moveRight) {
-        isMoveRight = moveRight;
-    }
-
-    public int getyVelocity() {
-        return yVelocity;
-    }
-
-    public void setyVelocity(int yVelocity) {
-        this.yVelocity = yVelocity;
-    }
-
-    public boolean isFalling() {
-        return isFalling;
-    }
-
-    public void setFalling(boolean falling) {
-        isFalling = falling;
-    }
-
-    public boolean isCanJump() {
-        return canJump;
-    }
-
-    public void setCanJump(boolean canJump) {
-        this.canJump = canJump;
-    }
-
-    public boolean isJumping() {
-        return isJumping;
-    }
-
-    public void setJumping(boolean jumping) {
-        isJumping = jumping;
-    }
-
-    public int getxAcceleration() {
-        return xAcceleration;
-    }
-
-    public void setxAcceleration(int xAcceleration) {
-        this.xAcceleration = xAcceleration;
-    }
-
-    public int getyAcceleration() {
-        return yAcceleration;
-    }
-
-    public void setyAcceleration(int yAcceleration) {
-        this.yAcceleration = yAcceleration;
-    }
-
-    public int getxMaxVelocity() {
-        return xMaxVelocity;
-    }
-
-    public void setxMaxVelocity(int xMaxVelocity) {
-        this.xMaxVelocity = xMaxVelocity;
-    }
-
-    public int getyMaxVelocity() {
-        return yMaxVelocity;
-    }
-
-    public void setyMaxVelocity(int yMaxVelocity) {
-        this.yMaxVelocity = yMaxVelocity;
-    }
-
-    int xMaxVelocity=7;
-    int yMaxVelocity=17;
     private static final Logger logger = LogManager.getLogger(GameCharacter.class);
 
-
-    public GameCharacter(int x, int y, int offsetX, int offsetY, KeyCode leftKey, KeyCode rightKey, KeyCode upKey) {
+    public GameCharacter(int x, int y, KeyCode leftKey, KeyCode rightKey, KeyCode upKey, String imagePath,
+                         int offsetX, int offsetY, int count, int columns, int rows,
+                         int width, int height, int fitWidth, int fitHeight) {
         this.x = x;
         this.y = y;
         this.setTranslateX(x);
         this.setTranslateY(y);
-        this.gameCharacterImg = new Image(Launcher.class.getResourceAsStream("assets/MarioSheet.png"));
-        this.imageView = new AnimatedSprite(gameCharacterImg, 4, 4, 1, offsetX, offsetY, 16, 32);
-        this.imageView.setFitWidth(CHARACTER_WIDTH);
-        this.imageView.setFitHeight(CHARACTER_HEIGHT);
         this.leftKey = leftKey;
         this.rightKey = rightKey;
         this.upKey = upKey;
+        this.gameCharacterImg = new Image(Launcher.class.getResourceAsStream(imagePath));
+        this.imageView = new AnimatedSprite(gameCharacterImg, count, columns, rows, offsetX, offsetY, width, height);
+        this.imageView.setFitWidth(fitWidth);
+        this.imageView.setFitHeight(fitHeight);
         this.getChildren().addAll(this.imageView);
     }
+
     public void moveX() {
         setTranslateX(x);
-        if(isMoveLeft) {
-            xVelocity =xVelocity>=xMaxVelocity? xMaxVelocity: xVelocity+xAcceleration;
-            x = x - xVelocity; }
-        if(isMoveRight) {
-            xVelocity =xVelocity>=xMaxVelocity? xMaxVelocity: xVelocity+xAcceleration;
-            x = x + xVelocity; }
+        if (isMoveLeft) {
+            xVelocity = xVelocity >= xMaxVelocity ? xMaxVelocity : xVelocity + xAcceleration;
+            x = x - xVelocity;
+        }
+        if (isMoveRight) {
+            xVelocity = xVelocity >= xMaxVelocity ? xMaxVelocity : xVelocity + xAcceleration;
+            x = x + xVelocity;
+        }
     }
+
     public void moveY() {
         setTranslateY(y);
-        if(isFalling) {
-            yVelocity =yVelocity >=yMaxVelocity?yMaxVelocity :yVelocity+yAcceleration;
+        if (isFalling) {
+            yVelocity = yVelocity >= yMaxVelocity ? yMaxVelocity : yVelocity + yAcceleration;
             y = y + yVelocity;
-        }else if(isJumping){
-            yVelocity =yVelocity <=0?0: yVelocity-yAcceleration;
-            y= y-yVelocity;
+        } else if (isJumping) {
+            yVelocity = yVelocity <= 0 ? 0 : yVelocity - yAcceleration;
+            y = y - yVelocity;
         }
     }
+
+    // UPDATED METHOD
     public void checkReachGameWall() {
-        if(x <= 0) {
-            x = 0;
-        } else if( x+getWidth() >= GameStage.WIDTH) {
-            x = GameStage.WIDTH-(int)getWidth();
+        // Check if the character is currently touching a wall
+        boolean isColliding = (x <= 0) || (x + getWidth() >= GameStage.WIDTH);
+
+        if (isColliding) {
+            // If the character is touching a wall, but wasn't on the previous frame...
+            if (!isTouchingWall) {
+                // ...then it's a new collision, so we log it.
+                logger.debug("Character collided with a wall.");
+                isTouchingWall = true; // Set the flag to true to prevent re-logging
+            }
+
+            // Always correct the character's position to prevent going off-screen
+            if (x <= 0) {
+                x = 0;
+            } else {
+                x = GameStage.WIDTH - (int) getWidth();
+            }
+        } else {
+            // If the character is not touching a wall, reset the flag
+            isTouchingWall = false;
         }
     }
+
+
     public void jump() {
         if (canJump) {
             yVelocity = yMaxVelocity;
@@ -225,39 +110,52 @@ public class GameCharacter extends Pane {
         }
     }
 
-    public void checkReachHighest () {
-        if(isJumping && yVelocity <= 0) {
+    public void checkReachHighest() {
+        if (isJumping && yVelocity <= 0) {
             isJumping = false;
             isFalling = true;
             yVelocity = 0;
         }
     }
+
     public void checkReachFloor() {
-        if(isFalling && y >= GameStage.GROUND- CHARACTER_HEIGHT) {
+        if (isFalling && y >= GameStage.GROUND - CHARACTER_HEIGHT) {
             isFalling = false;
-            canJump= true;
+            canJump = true;
+            logger.debug("Character collided with floor.");
         }
     }
+
     public void repaint() {
         moveX();
         moveY();
     }
+
     public void moveLeft() {
         setScaleX(-1);
-        isMoveLeft= true;
-        isMoveRight= false;
-    }
-    public void moveRight() {
-        setScaleX(1);
-        isMoveLeft= false;
-        isMoveRight= true;
-    }
-    public void stop() {
-        isMoveLeft= false;
-        isMoveRight= false;
-    }
-    public void trace() {
-        logger.info("x:{} y:{} vx:{} vy:{}",x,y,xVelocity,yVelocity);
+        isMoveLeft = true;
+        isMoveRight = false;
     }
 
+    public void moveRight() {
+        setScaleX(1);
+        isMoveLeft = false;
+        isMoveRight = true;
+    }
+
+    public void stop() {
+        isMoveLeft = false;
+        isMoveRight = false;
+    }
+
+    public void trace() {
+        logger.info("x:{} y:{} vx:{} vy:{}", x, y, xVelocity, yVelocity);
+    }
+
+    public AnimatedSprite getImageView() { return imageView; }
+    public KeyCode getLeftKey() { return leftKey; }
+    public KeyCode getRightKey() { return rightKey; }
+    public KeyCode getUpKey() { return upKey; }
+    public void setxMaxVelocity(int xMaxVelocity) { this.xMaxVelocity = xMaxVelocity; }
+    public void setyMaxVelocity(int yMaxVelocity) { this.yMaxVelocity = yMaxVelocity; }
 }

@@ -5,42 +5,10 @@ import se233.chapter4.view.GameStage;
 
 public class DrawingLoop implements Runnable {
     private GameStage gameStage;
-
-    public GameStage getGameStage() {
-        return gameStage;
-    }
-
-    public void setGameStage(GameStage gameStage) {
-        this.gameStage = gameStage;
-    }
-
-    public int getFrameRate() {
-        return frameRate;
-    }
-
-    public void setFrameRate(int frameRate) {
-        this.frameRate = frameRate;
-    }
-
-    public float getInterval() {
-        return interval;
-    }
-
-    public void setInterval(float interval) {
-        this.interval = interval;
-    }
-
-    public boolean isRunning() {
-        return running;
-    }
-
-    public void setRunning(boolean running) {
-        this.running = running;
-    }
-
     private int frameRate;
     private float interval;
     private boolean running;
+
     public DrawingLoop(GameStage gameStage) {
         this.gameStage = gameStage;
         frameRate = 60;
@@ -62,8 +30,13 @@ public class DrawingLoop implements Runnable {
     public void run() {
         while (running) {
             float time = System.currentTimeMillis();
-            checkDrawCollisions(gameStage.getGameCharacter());
-            paint(gameStage.getGameCharacter());
+
+            // Loop through all characters to check collisions and repaint
+            for (GameCharacter character : gameStage.getCharacters()) {
+                checkDrawCollisions(character);
+                paint(character);
+            }
+
             time = System.currentTimeMillis() - time;
             if (time < interval) {
                 try {
