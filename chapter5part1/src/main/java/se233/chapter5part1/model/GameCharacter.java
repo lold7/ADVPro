@@ -220,18 +220,30 @@ public class GameCharacter extends Pane {
         this.getChildren().addAll(this.imageView);
         setScaleX(id % 2 * 2 - 1);
     }
+    // In file: se233/chapter5part1/model/GameCharacter.java
+// REPLACE the entire old method with this one:
+
     public boolean collided(GameCharacter c) {
-        if (this.isMoveLeft && this.x > c.getX()) {
-            this.x = Math.max(this.x, c.getX() + c.getCharacterWidth());
+        // Horizontal collision
+        if (this.isMoveLeft && this.x > c.getX() && this.x < c.getX() + c.getCharacterWidth()) {
+            this.x = c.getX() + c.getCharacterWidth();
             this.stop();
-        } else if (this.isMoveRight && this.x < c.getX()) {
-            this.x = Math.min(this.x, c.getX()- this.characterWidth);
+        } else if (this.isMoveRight && this.x + this.getCharacterWidth() > c.getX() && this.x < c.getX()) {
+            this.x = c.getX() - this.getCharacterWidth();
             this.stop();
         }
-        if (this.isFalling && this.y < c.getY()) {
+
+        // Vertical collision (landing on top)
+        // In file: se233/chapter5part1/model/GameCharacter.java
+
+// ... inside the collided() method ...
+// Vertical collision (landing on top)
+        if (this.isFalling && this.y < c.getY() && Math.abs(this.y - c.getY()) <= this.getCharacterHeight()) {
             score++;
-            this.y = Math.min(GameStage.GROUND- this.characterHeight, c.getY());
-            this.repaint();
+            this.y = c.getY() - this.getCharacterHeight(); // Land perfectly on top
+            this.isFalling = false; // Stop falling
+            this.canJump = true;    // Can jump now
+            this.yVelocity = 0;   // Reset vertical velocity
             c.collapsed();
             c.respawn();
             return true;
@@ -297,8 +309,9 @@ public class GameCharacter extends Pane {
     public void checkReachGameWall() {
         if(x <= 0) {
             x = 0;
-        } else if( x+getWidth() >= GameStage.WIDTH) {
-            x = GameStage.WIDTH-(int)getWidth();
+            // CHANGE THIS LINE:
+        } else if( x + getCharacterWidth() >= GameStage.WIDTH) { // Use getCharacterWidth() instead of getWidth()
+            x = GameStage.WIDTH - (int)getCharacterWidth();    // Also change it here
         }
     }
     public void jump() {
