@@ -5,6 +5,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import se233.chapter5part2.model.Food;
 import se233.chapter5part2.model.Snake;
 
@@ -25,12 +26,21 @@ public class GameStage extends Pane {
     public void render(Snake snake, Food food) {
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.clearRect(0, 0, WIDTH * TILE_SIZE, HEIGHT * TILE_SIZE);
+
+        // Draw Snake
         gc.setFill(Color.BLUE);
         snake.getBody().forEach(p -> {
             gc.fillRect(p.getX() * TILE_SIZE, p.getY() * TILE_SIZE, TILE_SIZE, TILE_SIZE);
         });
-        gc.setFill(Color.RED);
+
+        // Draw Food
+        gc.setFill(food.getType().color);
         gc.fillRect(food.getPosition().getX() * TILE_SIZE, food.getPosition().getY() * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+
+        // Draw Score
+        gc.setFill(Color.BLACK);
+        gc.setFont(new Font("Verdana", 20));
+        gc.fillText("Score: " + snake.getScore(), 10, 25);
     }
 
     public KeyCode getKey() { return key; }

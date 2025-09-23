@@ -1,18 +1,14 @@
 package se233.chapter5part2;
 import javafx.geometry.Point2D;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import se233.chapter5part2.model.Direction;
 import se233.chapter5part2.model.Food;
+import se233.chapter5part2.model.FoodType;
 import se233.chapter5part2.model.Snake;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-// NOTE: You will need to import the Snake and Direction classes from your project.
-// e.g. import com.example.snake.model.Snake;
-// e.g. import com.example.snake.model.Direction;
 
 public class SnakeTest {
     public Snake getSnake() {
@@ -84,5 +80,21 @@ public class SnakeTest {
         snake.move();
         snake.grow();
         assertTrue(snake.checkDead());
+    }
+
+    @Test
+    public void eatNormalFood_increasesScoreByOne() {
+        Food food = new Food(new Point2D(0,0), FoodType.NORMAL);
+        assertEquals(0, snake.getScore());
+        snake.eatFood(food);
+        assertEquals(1, snake.getScore());
+    }
+
+    @Test
+    public void eatSpecialFood_increasesScoreByFive() {
+        Food food = new Food(new Point2D(0,0), FoodType.SPECIAL);
+        assertEquals(0, snake.getScore());
+        snake.eatFood(food);
+        assertEquals(5, snake.getScore());
     }
 }

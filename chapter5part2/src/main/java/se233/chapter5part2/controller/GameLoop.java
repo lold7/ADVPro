@@ -1,5 +1,7 @@
 package se233.chapter5part2.controller;
 
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
 import javafx.scene.input.KeyCode;
 import se233.chapter5part2.model.Direction;
 import se233.chapter5part2.model.Food;
@@ -36,25 +38,41 @@ public class GameLoop implements Runnable {
 
     private void checkCollision() {
         if (snake.collided(food)) {
-            snake.grow();
+            snake.eatFood(food); // Pass food to eatFood method
             food.respawn();
         }
-        if (snake.checkDead()) { running = false; }
+        if (snake.checkDead()) {
+            running = false;
+        }
     }
 
     private void redraw() { gameStage.render(snake, food); }
+
+    private void showGameOver() {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Game Over");
+            alert.setHeaderText(null);
+            alert.setContentText("Game Over! Your score: " + snake.getScore());
+            alert.showAndWait();
+        });
+    }
 
     @Override
     public void run() {
         while (running) {
             keyProcess();
             checkCollision();
-            redraw();
+            if (running) {
+                redraw();
+            }
             try {
                 Thread.sleep((long)interval);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+        // Show Game Over pop-up after the loop terminates
+        showGameOver();
     }
 }
