@@ -1,0 +1,11 @@
+2025-10-09 10:05:43 INFO  AllEventHandlers:42 - Adding currency: jpy
+2025-10-09 10:05:54 INFO  AllEventHandlers:42 - Adding currency: EUR
+2025-10-09 10:06:39 INFO  AllEventHandlers:42 - Adding currency: JPY
+2025-10-09 10:06:46 INFO  AllEventHandlers:62 - Deleting currency: JPY
+2025-10-09 10:09:58 INFO  AllEventHandlers:42 - Adding currency: EUR
+2025-10-09 10:43:21 INFO  AllEventHandlers:42 - Adding currency: EUR
+2025-10-09 10:44:15 INFO  AllEventHandlers:42 - Adding currency: E
+2025-10-09 10:44:23 INFO  AllEventHandlers:42 - Adding currency: EUR
+2025-10-09 10:47:28 INFO  AllEventHandlers:62 - Deleting currency: USD
+2025-10-09 10:47:34 INFO  AllEventHandlers:42 - Adding currency: USD
+2025-10-09 10:58:57 INFO  AllEventHandlers:42 - Adding currency: JPY
